@@ -71,7 +71,7 @@ jobs:
                   cd ..
                   mv espeak-ng/_espeak_ng_data/share/espeak-ng-data ./espeak-ng-data
                   tar -czf espeak-ng-data.tar.gz espeak-ng-data
-                  gh release upload ${{ github.event.release.tag_name }} espeak-ng-data.tar.gz --clobber
+                  gh release upload ${{ github.event.workflow_run.head_branch }} espeak-ng-data.tar.gz --clobber
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               shell: bash
@@ -79,7 +79,7 @@ jobs:
 
             - name: Upload to releases
               run: |
-                  gh release upload ${{ github.event.release.tag_name }} ${{ matrix.bin }} --clobber
+                  gh release upload ${{ github.event.workflow_run.head_branch }} ${{ matrix.bin }} --clobber
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               shell: bash
