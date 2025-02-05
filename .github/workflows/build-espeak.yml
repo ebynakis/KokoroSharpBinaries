@@ -21,10 +21,6 @@ jobs:
 
                     - platform: "ubuntu-20.04" # Linux x86_64
                       bin: "espeak-ng-linux-amd64.kkrs"
-                      extra-cmake-args: "-A ARM64"
-
-                    - platform: "ubuntu-20.04" # Linux arm64
-                      bin: "espeak-ng-linux-arm64.kkrs"
 
                     - platform: "windows-latest" # Windows x86_64
                       bin: "espeak-ng-win-amd64.kkrs"
