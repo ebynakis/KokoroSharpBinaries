@@ -3,7 +3,7 @@ name: Create Release
 on:
     push:
         tags:
-            - "*"
+            - "v*.*.*"
 
 jobs:
     create-release:
@@ -12,7 +12,9 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - name: Create GitHub Release
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  gh release create ${{ github.ref_name }} \
-                    --title "Release ${{ github.ref_name }}" \
+                  gh release create ${GITHUB_REF#refs/tags/} \
+                    --title "Release ${GITHUB_REF#refs/tags/}" \
                     --notes "Automated release of binaries needed by KokoroSharp's `.nupkg`."
