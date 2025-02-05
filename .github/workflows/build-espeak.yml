@@ -49,6 +49,7 @@ jobs:
             - name: Build espeakng-loader
               run: |
                   git clone --single-branch --depth 1 -b 1.52.0 https://github.com/espeak-ng/espeak-ng
+                  chmod +x build_espeak.sh
                   ./build_espeak.sh
               shell: bash
               env:
