@@ -1,33 +1,18 @@
 name: Add espeak.zip to created release
 
 on:
-    workflow_run:
-        workflows: ["Create Release"]
-        types:
-            - completed
+    workflow_call:
+        inputs:
+            matrix:
+                required: true
+                type: array
 
 jobs:
     build:
         name: ${{ matrix.bin }}
         strategy:
             fail-fast: false
-            matrix:
-                include:
-                    - platform: "macos-14" # macOS arm64
-                      bin: "espeak-ng-macos-arm64.dll"
-
-                    - platform: "macos-13" # macOS x86-64
-                      bin: "espeak-ng-macos-amd64.dll"
-
-                    - platform: "ubuntu-20.04" # Linux x86_64
-                      bin: "espeak-ng-linux-amd64.dll"
-
-                    - platform: "windows-latest" # Windows x86_64
-                      bin: "espeak-ng-win-amd64.dll"
-
-                    - platform: "windows-latest" # Windows arm64
-                      bin: "espeak-ng-win-arm64.dll"
-                      extra-cmake-args: "-A ARM64"
+            matrix: ${{ fromJson(inputs.matrix) }}
 
         runs-on: ${{ matrix.platform }}
 
@@ -81,7 +66,7 @@ jobs:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               shell: bash
 
-            - name: Prepare espeak-ng-data
+            - name: Include espeak-ng-data
               run: |
                   cd espeak
                   git clone --single-branch --depth 1 -b 1.52.0 https://github.com/espeak-ng/espeak-ng
@@ -99,7 +84,7 @@ jobs:
               run: |
                   wget -O espeak/LICENSE https://raw.githubusercontent.com/espeak-ng/espeak-ng/master/COPYING
                   zip -r espeak-ng-binaries-v1.52.zip espeak
-                  gh release upload ${{ github.event.workflow_run.head_branch }} espeak-ng-binaries-v1.52.zip --clobber
+                  gh release upload ${{ github.event.workflow_call.head_branch }} espeak-ng-binaries-v1.52.zip --clobber
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               shell: bash
