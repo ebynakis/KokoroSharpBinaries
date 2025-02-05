@@ -82,9 +82,11 @@ jobs:
 
             - name: Zip and upload to release
               run: |
+                  echo "The binaries included are completely standalone.\n\nTo use them, simply set the \`ESPEAK_DATA_PATH\` variable to \"your_path\\espeak-ng-data\" and invoke the appropriate \`.dll\` file.\n\nThey are all made to have the 'dll' extension just for consistency." > espeak/HOW_TO_USE.txt
                   wget -O espeak/LICENSE https://raw.githubusercontent.com/espeak-ng/espeak-ng/master/COPYING
+                  wget -O espeak/README.md https://raw.githubusercontent.com/espeak-ng/espeak-ng/master/README.md
                   zip -r espeak-ng-binaries-v1.52.zip espeak
-                  gh release upload ${{ github.event.workflow_call.head_branch }} espeak-ng-binaries-v1.52.zip --clobber
+                  gh release upload ${{ github.ref_name }} espeak-ng-binaries-v1.52.zip --clobber
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               shell: bash
