@@ -5,7 +5,7 @@ on:
         inputs:
             matrix:
                 required: true
-                type: array
+                type: string
 
 jobs:
     build:
