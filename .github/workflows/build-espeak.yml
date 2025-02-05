@@ -1,7 +1,9 @@
-name: Add espeak binaries to release
+name: Add espeak binaries to created release
 
 on:
-    release:
+    workflows: ["Create Release"]
+    types:
+        - completed
 
 jobs:
     build:
