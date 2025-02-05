@@ -1,9 +1,10 @@
 name: Add espeak binaries to created release
 
 on:
-    workflows: ["Create Release"]
-    types:
-        - completed
+    workflow_run:
+        workflows: ["Create Release"]
+        types:
+            - completed
 
 jobs:
     build:
