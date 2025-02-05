@@ -98,8 +98,8 @@ jobs:
             - name: Zip and upload to release
               run: |
                   wget -O espeak/LICENSE https://raw.githubusercontent.com/espeak-ng/espeak-ng/master/COPYING
-                  zip -r espeak.zip espeak
-                  gh release upload ${{ github.event.workflow_run.head_branch }} espeak.zip --clobber
+                  zip -r espeak-ng-binaries-v1.52.zip espeak
+                  gh release upload ${{ github.event.workflow_run.head_branch }} espeak-ng-binaries-v1.52.zip --clobber
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               shell: bash
