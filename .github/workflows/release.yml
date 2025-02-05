@@ -17,4 +17,4 @@ jobs:
               run: |
                   gh release create ${GITHUB_REF#refs/tags/} \
                     --title "Release ${GITHUB_REF#refs/tags/}" \
-                    --notes "Automated release of binaries needed by KokoroSharp's `.nupkg`."
+                    --notes "Automated release of binaries needed by KokoroSharp's \`.nupkg\`."

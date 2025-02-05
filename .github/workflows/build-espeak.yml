@@ -14,19 +14,19 @@ jobs:
             matrix:
                 include:
                     - platform: "macos-14" # macOS arm64
-                      bin: "espeak-ng-macos-arm64.kkrs"
+                      bin: "espeak-ng-macos-arm64.bin"
 
                     - platform: "macos-13" # macOS x86-64
-                      bin: "espeak-ng-macos-amd64.kkrs"
+                      bin: "espeak-ng-macos-amd64.bin"
 
                     - platform: "ubuntu-20.04" # Linux x86_64
-                      bin: "espeak-ng-linux-amd64.kkrs"
+                      bin: "espeak-ng-linux-amd64.bin"
 
                     - platform: "windows-latest" # Windows x86_64
-                      bin: "espeak-ng-win-amd64.kkrs"
+                      bin: "espeak-ng-win-amd64.bin"
 
                     - platform: "windows-latest" # Windows arm64
-                      bin: "espeak-ng-win-arm64.kkrs"
+                      bin: "espeak-ng-win-arm64.bin"
                       extra-cmake-args: "-A ARM64"
 
         runs-on: ${{ matrix.platform }}
@@ -65,6 +65,9 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
             - name: Download all artifacts
               run: |
                   mkdir -p espeak
@@ -88,7 +91,7 @@ jobs:
                   cmake --build build
                   cmake --install build
                   cd ..
-                  mv espeak-ng/_espeak_ng_data/share/espeak-ng-data ./espeak/espeak-ng-data
+                  mv espeak-ng/_espeak_ng_data/share/espeak-ng-data ./espeak-ng-data
                   rm -rf espeak-ng
               shell: bash
 
