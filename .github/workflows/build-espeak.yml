@@ -1,4 +1,4 @@
-name: Add espeak binaries to created release
+name: Add espeak.zip to created release
 
 on:
     workflow_run:
@@ -14,22 +14,23 @@ jobs:
             matrix:
                 include:
                     - platform: "macos-14" # macOS arm64
-                      bin: "macos-arm64"
+                      bin: "espeak-ng-macos-arm64.kkrs"
 
                     - platform: "macos-13" # macOS x86-64
-                      bin: "macos-amd64"
+                      bin: "espeak-ng-macos-amd64.kkrs"
 
                     - platform: "ubuntu-20.04" # Linux x86_64
-                      bin: "linux-amd64"
+                      bin: "espeak-ng-linux-amd64.kkrs"
+                      extra-cmake-args: "-A ARM64"
 
                     - platform: "ubuntu-20.04" # Linux arm64
-                      bin: "linux-arm64"
+                      bin: "espeak-ng-linux-arm64.kkrs"
 
                     - platform: "windows-latest" # Windows x86_64
-                      bin: "win-amd64"
+                      bin: "espeak-ng-win-amd64.kkrs"
 
                     - platform: "windows-latest" # Windows arm64
-                      bin: "win-arm64"
+                      bin: "espeak-ng-win-arm64.kkrs"
                       extra-cmake-args: "-A ARM64"
 
         runs-on: ${{ matrix.platform }}
@@ -46,40 +47,65 @@ jobs:
                   echo "CXX=aarch64-linux-gnu-g++" >> $GITHUB_ENV
               if: matrix.bin == 'linux-arm64.tar.gz'
 
-            - name: Build espeakng-loader
+            - name: Build binaries
               run: |
                   git clone --single-branch --depth 1 -b 1.52.0 https://github.com/espeak-ng/espeak-ng
                   chmod +x build_espeak.sh
                   ./build_espeak.sh
+                  mkdir -p espeak
+                  mv ./espeak-ng.bin espeak/${{ matrix.bin }}
               shell: bash
               env:
                   EXTRA_CMAKE_ARGS: ${{ matrix.extra-cmake-args }}
 
-            - name: Create bin
+            - name: Upload binaries as artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: binaries-${{ matrix.bin }}
+                  path: espeak
+
+    finalize:
+        needs: build
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Download binaries artifact
+              uses: actions/download-artifact@v3
+              with:
+                  name: binaries
+
+            - name: Download all artifacts
               run: |
-                  mv ./espeak-ng.bin ${{ matrix.bin }}
+                  mkdir -p espeak
+                  for artifact in $(gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts --jq '.artifacts[].name'); do
+                      echo "Downloading artifact: $artifact"
+                      gh run download --name $artifact --dir ./espeak
+                  done
+                  echo "All binaries are now in ./espeak"
+                  ls -R ./espeak
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               shell: bash
 
             - name: Prepare espeak-ng-data
               run: |
+                  cd espeak
+                  git clone --single-branch --depth 1 -b 1.52.0 https://github.com/espeak-ng/espeak-ng
                   cd espeak-ng
                   rm -rf build
                   cmake -B build . -DCMAKE_INSTALL_PREFIX=_espeak_ng_data -DCOMPILE_INTONATIONS=ON
                   cmake --build build
                   cmake --install build
-
                   cd ..
-                  mv espeak-ng/_espeak_ng_data/share/espeak-ng-data ./espeak-ng-data
-                  tar -czf espeak-ng-data.tar.gz espeak-ng-data
-                  gh release upload ${{ github.event.workflow_run.head_branch }} espeak-ng-data.tar.gz --clobber
-              env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  mv espeak-ng/_espeak_ng_data/share/espeak-ng-data ./espeak/espeak-ng-data
+                  rm -rf espeak-ng
               shell: bash
-              if: matrix.platform == 'macos-14'
 
-            - name: Upload to releases
+            - name: Zip and upload to release
               run: |
-                  gh release upload ${{ github.event.workflow_run.head_branch }} ${{ matrix.bin }} --clobber
+                  wget -O espeak/LICENSE https://raw.githubusercontent.com/espeak-ng/espeak-ng/master/COPYING
+                  zip -r espeak.zip espeak
+                  gh release upload ${{ github.event.workflow_run.head_branch }} espeak.zip --clobber
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               shell: bash
